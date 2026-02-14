@@ -315,7 +315,7 @@
       </div>
 
       <div id="spotifyBox">
-        <iframe id="spotifyFrame" title="Spotify Player" style="width:100%; height:152px; border:0; border-radius:16px;" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <iframe id="spotifyFrame" title="Spotify Player" style="width:100%; height:92px; border:0; border-radius:16px;" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
       </div>
 
       <div class="ctaRow" style="justify-content:center; margin-top:14px;">
@@ -411,6 +411,36 @@ Will you be my Valentine? 💖</div>
   // Everything runs after DOM is ready (prevents "buttons not working")
   window.addEventListener('DOMContentLoaded', () => {
     const rand = (a,b)=> Math.random()*(b-a)+a;
+
+    // Tiny toast notifications (used by "More Surprises" etc.)
+    let toastEl;
+    function toast(msg){
+      if(toastEl) toastEl.remove();
+      toastEl = document.createElement('div');
+      toastEl.textContent = msg;
+      Object.assign(toastEl.style, {
+        position:'fixed', left:'50%', bottom:'18px', transform:'translateX(-50%)',
+        padding:'10px 12px', background:'rgba(255,255,255,.82)',
+        border:'1px solid rgba(0,0,0,.10)', borderRadius:'14px',
+        boxShadow:'0 16px 40px rgba(0,0,0,.16)', backdropFilter:'blur(10px)',
+        fontWeight:'900', zIndex:9999, maxWidth:'min(92vw, 520px)', textAlign:'center'
+      });
+      document.body.appendChild(toastEl);
+      toastEl.animate([
+        {opacity:0, transform:'translateX(-50%) translateY(10px)'},
+        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
+        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
+        {opacity:0, transform:'translateX(-50%) translateY(10px)'}
+      ], {duration:2200, easing:'ease-out'}).onfinish = ()=> toastEl?.remove();
+    }
+
+    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function softPopup(msg){
+      // Prefer toast; rarely use blocking alert.
+      toast(msg);
+      if(Math.random() < 0.18) alert(msg);
+    }
 
     const hearts = document.getElementById('hearts');
     const burst = document.getElementById('burst');
@@ -532,13 +562,30 @@ Will you be my Valentine? 💖</div>
       branches.classList.add('drawBranches');
 
       // heart leaves (with explicit background)
-      for(let i=0;i<28;i++){
+      // Place hearts in a canopy shape (less random, more "tree")
+      const canopy = [
+        [50,18],[42,20],[58,20],[36,24],[64,24],
+        [30,30],[70,30],[26,38],[74,38],
+        [30,46],[70,46],[36,54],[64,54],
+        [42,58],[58,58],[50,62]
+      ];
+      canopy.forEach((pt, i)=>{
         const leaf = document.createElement('div');
         leaf.className = 'leaf';
-        leaf.style.left = rand(26,74) + '%';
-        leaf.style.top = rand(16,70) + '%';
+        leaf.style.left = pt[0] + '%';
+        leaf.style.top = pt[1] + '%';
+        leaf.style.background = (i % 5 === 0) ? 'var(--accent2)' : 'var(--accent)';
+        leaf.style.animationDelay = (i*70) + 'ms';
+        leafLayer.appendChild(leaf);
+      });
+      // Add a few extras around canopy edges
+      for(let i=0;i<10;i++){
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.style.left = rand(28,72) + '%';
+        leaf.style.top = rand(16,66) + '%';
         leaf.style.background = Math.random() < 0.28 ? 'var(--accent2)' : 'var(--accent)';
-        leaf.style.animationDelay = (i*55) + 'ms';
+        leaf.style.animationDelay = (canopy.length*70 + i*55) + 'ms';
         leafLayer.appendChild(leaf);
       }
 
@@ -616,6 +663,8 @@ Will you be my Valentine? 💖</div>
     // Spotify embed (cannot reliably autoplay)
     if(spotifyFrame){
       spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
+      // Hint for the user (Spotify usually needs one tap)
+      setTimeout(()=> toast('Tap ▶ on the Spotify player 💗'), 600);
     }
 
     openSlideshow?.addEventListener('click', ()=>{
@@ -650,6 +699,42 @@ Will you be my Valentine? 💖</div>
 
     [to, from, message].forEach(el => el?.addEventListener('input', sync));
     sync();
+
+    // --- Buttons on main page ---
+    const celebrateBtn = document.getElementById('celebrate');
+    const copyBtn = document.getElementById('copy');
+    const surpriseBtn = document.getElementById('surprise');
+
+    celebrateBtn?.addEventListener('click', (e)=>{
+      const r = e.target.getBoundingClientRect();
+      heartBurst(r.left + r.width/2, r.top + r.height/2);
+      toast(pick(['Sent with love 💞','Hearts delivered 💌','Love mode: ON 💖']));
+    });
+
+    copyBtn?.addEventListener('click', async ()=>{
+      const txt = `💘 Valentine’s Note 💘\n\nTo: ${pTo?.textContent || ''}\nFrom: ${pFrom?.textContent || ''}\n\n${pMsg?.textContent || ''}`;
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast('Copied! Paste it into your chat ✨');
+      }catch{
+        softPopup('Copy failed on this browser — try selecting the text manually.');
+      }
+    });
+
+    const surpriseLines = [
+      'You’re my favorite notification. 📱💗',
+      'If love was a playlist, you’d be on repeat. 🎶',
+      'I’d still pick you in every universe. 🌙',
+      'Plot twist: I like you… a LOT. 😳💘',
+      'My heart does a little dance when I think of you. 🩷',
+      'You + me = my happiest place. 🥰'
+    ];
+
+    surpriseBtn?.addEventListener('click', ()=>{
+      const msg = pick(surpriseLines);
+      softPopup(msg);
+      heartBurst(rand(120, window.innerWidth-120), rand(160, window.innerHeight-180));
+    });
   });
 </script>
 </body>
