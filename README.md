@@ -221,7 +221,7 @@
     @keyframes rain{to{transform: translateX(var(--drift)) translateY(420px) rotate(45deg); opacity:0;}}
 
     /* Slideshow */
-    .slideStage{position:.slideStage{position:relative; height:460px; border-radius:20px; overflow:hidden;
+    .slideStage{position:relative; height:460px; border-radius:20px; overflow:hidden;
       border:1px solid rgba(255,255,255,.55);
       box-shadow: 0 18px 55px rgba(0,0,0,.12);
       background: rgba(255,255,255,.25);
@@ -407,283 +407,188 @@ Will you be my Valentine? 💖</div>
   </footer>
 
   <script>
-    const rand = (a,b)=> Math.random()*(b-a)+a;
-    const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+  const rand = (a,b)=> Math.random()*(b-a)+a;
+  const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
 
-    // Floating background hearts
-    const hearts = document.getElementById('hearts');
-    for(let i=0;i<26;i++){
-      const h = document.createElement('div');
-      h.className = 'heart';
-      h.style.left = rand(0,100) + 'vw';
-      h.style.animationDuration = rand(6,14) + 's';
-      h.style.animationDelay = (-rand(0,8)) + 's';
-      h.style.setProperty('--s', rand(.7, 1.8));
-      h.style.opacity = rand(.25, .75);
-      h.style.background = Math.random() < .25 ? 'var(--accent2)' : 'var(--accent)';
-      hearts.appendChild(h);
+  /* ================= BACKGROUND HEARTS ================= */
+  const hearts = document.getElementById('hearts');
+  for(let i=0;i<26;i++){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.style.left = rand(0,100) + 'vw';
+    h.style.animationDuration = rand(6,14) + 's';
+    h.style.animationDelay = (-rand(0,8)) + 's';
+    h.style.setProperty('--s', rand(.7, 1.8));
+    h.style.opacity = rand(.25, .75);
+    h.style.background = Math.random() < .25 ? 'var(--accent2)' : 'var(--accent)';
+    hearts.appendChild(h);
+  }
+
+  /* ================= BURST ================= */
+  const burst = document.getElementById('burst');
+  function heartBurst(x,y){
+    for(let i=0;i<20;i++){
+      const s = document.createElement('div');
+      s.className = 'spark';
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      s.style.setProperty('--dx', rand(-160, 160) + 'px');
+      s.style.setProperty('--dy', rand(-180, 120) + 'px');
+      burst.appendChild(s);
+      s.addEventListener('animationend', ()=> s.remove());
     }
+  }
 
-    // Bursts
-    const burst = document.getElementById('burst');
-    function heartBurst(x,y){
-      const N = 22;
-      for(let i=0;i<N;i++){
-        const s = document.createElement('div');
-        s.className = 'spark';
-        s.style.left = x + 'px';
-        s.style.top = y + 'px';
-        s.style.setProperty('--dx', rand(-160, 160) + 'px');
-        s.style.setProperty('--dy', rand(-180, 120) + 'px');
-        s.style.background = Math.random() < .35 ? 'var(--accent2)' : 'var(--accent)';
-        burst.appendChild(s);
-        s.addEventListener('animationend', ()=> s.remove());
-      }
-    }
+  /* ================= PAGE FLOW ================= */
+  const ask = document.getElementById('ask');
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const askBtns = document.getElementById('askBtns');
 
-    // Tiny toast
-    let toastEl;
-    function toast(msg){
-      if(toastEl) toastEl.remove();
-      toastEl = document.createElement('div');
-      toastEl.textContent = msg;
-      Object.assign(toastEl.style, {
-        position:'fixed', left:'50%', bottom:'22px', transform:'translateX(-50%)',
-        padding:'10px 14px', background:'rgba(255,255,255,.78)',
-        border:'1px solid rgba(0,0,0,.10)', borderRadius:'14px',
-        boxShadow:'0 16px 40px rgba(0,0,0,.16)', backdropFilter:'blur(10px)',
-        fontWeight:'900', zIndex:9999
-      });
-      document.body.appendChild(toastEl);
-      toastEl.animate([
-        {opacity:0, transform:'translateX(-50%) translateY(10px)'},
-        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
-        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
-        {opacity:0, transform:'translateX(-50%) translateY(10px)'}
-      ], {duration:2200, easing:'ease-out'}).onfinish = ()=> toastEl?.remove();
-    }
+  const treeWrap = document.getElementById('treeWrap');
+  const slideWrap = document.getElementById('slideWrap');
+  const main = document.getElementById('main');
 
-    // 1) Ask logic
-    const ask = document.getElementById('ask');
-    const yesBtn = document.getElementById('yesBtn');
-    const noBtn = document.getElementById('noBtn');
-    const askBtns = document.getElementById('askBtns');
+  /* ================= NO BUTTON LOGIC ================= */
+  let noScale = 1;
+  let yesScale = 1;
 
-    let noScale = 1;
-    let yesScale = 1;
+  function moveNo(){
+    const area = askBtns.getBoundingClientRect();
+    const pad = 10;
+    const x = rand(pad, area.width - 80);
+    const y = rand(pad, area.height - 40);
 
-    function moveNoButton(){
-      const card = askBtns.getBoundingClientRect();
-      const btn = noBtn.getBoundingClientRect();
-      const pad = 6;
-      const maxX = Math.max(pad, card.width - btn.width - pad);
-      const maxY = Math.max(pad, card.height - btn.height - pad);
-      const x = rand(pad, maxX);
-      const y = rand(pad, maxY);
-      noBtn.style.position = 'absolute';
-      askBtns.style.position = 'relative';
-      noBtn.style.left = x + 'px';
-      noBtn.style.top = y + 'px';
+    askBtns.style.position = 'relative';
+    noBtn.style.position = 'absolute';
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
 
-      noScale = Math.max(0.35, noScale * 0.85);
-      yesScale = Math.min(1.9, yesScale * 1.10);
-      noBtn.style.transform = `scale(${noScale})`;
-      yesBtn.style.transform = `scale(${yesScale})`;
+    noScale = Math.max(.35, noScale * .85);
+    yesScale = Math.min(2, yesScale * 1.1);
 
-      heartBurst(btn.left + btn.width/2, btn.top + btn.height/2);
-    }
+    noBtn.style.transform = `scale(${noScale})`;
+    yesBtn.style.transform = `scale(${yesScale})`;
 
-    ['mouseenter','pointerdown','click'].forEach(evt => {
-      noBtn.addEventListener(evt, (e)=>{ e.preventDefault(); moveNoButton(); });
-    });
+    const r = noBtn.getBoundingClientRect();
+    heartBurst(r.left + r.width/2, r.top + r.height/2);
+  }
 
-    // 2) Tree overlay
-    const treeWrap = document.getElementById('treeWrap');
-    const trunk = document.getElementById('trunk');
-    const branches = document.getElementById('branches');
-    const leafLayer = document.getElementById('leafLayer');
-    const rainLayer = document.getElementById('rainLayer');
-    const toSlideshow = document.getElementById('toSlideshow');
+  noBtn.addEventListener('mouseenter', moveNo);
+  noBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    moveNo();
+  });
 
-    function makeLeaf(x,y,delay){
+  /* ================= YES BUTTON ================= */
+  yesBtn.addEventListener('click', ()=>{
+    ask.hidden = true;
+    treeWrap.hidden = false;
+    growTree();
+  });
+
+  /* ================= TREE ================= */
+  const trunk = document.getElementById('trunk');
+  const branches = document.getElementById('branches');
+  const leafLayer = document.getElementById('leafLayer');
+  const rainLayer = document.getElementById('rainLayer');
+  const toSlideshow = document.getElementById('toSlideshow');
+
+  function growTree(){
+    trunk.style.opacity = '1';
+    branches.style.opacity = '1';
+    trunk.classList.add('drawTrunk');
+    branches.classList.add('drawBranches');
+
+    for(let i=0;i<20;i++){
       const leaf = document.createElement('div');
       leaf.className = 'leaf';
-      leaf.style.left = x + '%';
-      leaf.style.top = y + '%';
-      leaf.style.animationDelay = delay + 'ms';
-      leaf.style.background = Math.random() < .28 ? 'var(--accent2)' : 'var(--accent)';
+      leaf.style.left = rand(30,70) + '%';
+      leaf.style.top = rand(20,70) + '%';
       leafLayer.appendChild(leaf);
     }
 
-    function startHeartRain(){
-      const start = Date.now();
-      const timer = setInterval(()=>{
-        const now = Date.now();
-        if(now - start > 2800){ clearInterval(timer); return; }
+    for(let i=0;i<40;i++){
+      setTimeout(()=>{
         const h = document.createElement('div');
         h.className = 'rainHeart';
         h.style.left = rand(5,95) + '%';
-        h.style.setProperty('--dur', rand(1.8, 3.2) + 's');
-        h.style.setProperty('--drift', rand(-40, 40) + 'px');
-        h.style.background = Math.random() < .3 ? 'var(--accent2)' : 'var(--accent)';
+        h.style.setProperty('--dur', rand(1.5,3) + 's');
         rainLayer.appendChild(h);
         h.addEventListener('animationend', ()=> h.remove());
-      }, 70);
+      }, i*60);
     }
+  }
 
-    function growTree(){
-      trunk.style.opacity = '1';
-      branches.style.opacity = '1';
-      trunk.classList.add('drawTrunk');
-      branches.classList.add('drawBranches');
+  toSlideshow.addEventListener('click', ()=>{
+    treeWrap.hidden = true;
+    slideWrap.hidden = false;
+    startSlideshow();
+  });
 
-      leafLayer.innerHTML = '';
-      rainLayer.innerHTML = '';
+  /* ================= SLIDESHOW ================= */
+  const slideA = document.getElementById('slideA');
+  const slideB = document.getElementById('slideB');
+  const slideStage = document.getElementById('slideStage');
 
-      const leaves = [
-        [46, 28],[52, 26],[58, 28],[40, 32],[64, 34],
-        [36, 40],[44, 38],[52, 36],[60, 38],[68, 42],
-        [32, 50],[40, 52],[50, 48],[60, 52],[70, 54],
-        [38, 62],[50, 60],[62, 62],[46, 70],[56, 70]
-      ];
-      leaves.forEach((p, i)=> makeLeaf(p[0], p[1], i*70));
+  const photos = [
+    'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf6?auto=format&fit=crop&w=1400&q=80'
+  ];
 
-      const stage = document.getElementById('treeStage').getBoundingClientRect();
-      heartBurst(stage.left + stage.width/2, stage.top + stage.height/3);
-      startHeartRain();
-    }
+  let index = 0;
+  let timer;
+  let front = 'A';
 
-    yesBtn.addEventListener('click', ()=>{
-      ask.hidden = true;
-      treeWrap.hidden = false;
-      setTimeout(growTree, 120);
-      toast('She said yes!! 💖');
-    });
+  function showSlide(i){
+    index = (i + photos.length) % photos.length;
+    const incoming = front === 'A' ? slideB : slideA;
+    const outgoing = front === 'A' ? slideA : slideB;
 
-    // 3) Slideshow overlay (no controls)
-    const slideWrap = document.getElementById('slideWrap');
-    const slideA = document.getElementById('slideA');
-    const slideB = document.getElementById('slideB');
-    const slideStage = document.getElementById('slideStage');
+    incoming.src = photos[index];
+    incoming.classList.add('show');
+    outgoing.classList.remove('show');
+    front = front === 'A' ? 'B' : 'A';
+  }
 
-    // Replace these with your own photos (local hosted URLs or data URLs)
-    // Example if hosting: ['photos/01.jpg','photos/02.jpg',...]
-    let photos = [
-      'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf6?auto=format&fit=crop&w=1400&q=80'
-    ];
+  function startSlideshow(){
+    showSlide(0);
+    clearInterval(timer);
+    timer = setInterval(()=> showSlide(index+1), 3000);
+  }
 
-    let idx = 0;
-    let timer;
-    let front = 'A';
+  slideStage.addEventListener('click', ()=>{
+    showSlide(index+1);
+  });
 
-    function showSlide(i){
-      if(!photos.length) return;
-      idx = (i + photos.length) % photos.length;
-      const url = photos[idx];
-      const incoming = (front === 'A') ? slideB : slideA;
-      const outgoing = (front === 'A') ? slideA : slideB;
-      incoming.src = url;
-      incoming.classList.add('show');
-      outgoing.classList.remove('show');
-      front = (front === 'A') ? 'B' : 'A';
-    }
+  /* Spotify embed */
+  const spotifyFrame = document.getElementById('spotifyFrame');
+  spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
 
-    function next(){ showSlide(idx + 1); }
-    function startAuto(){ stopAuto(); timer = setInterval(next, 3000); }
-    function stopAuto(){ if(timer) clearInterval(timer); timer = null; }
+  /* Continue to main */
+  document.getElementById('enterSite').addEventListener('click', ()=>{
+    slideWrap.hidden = true;
+    main.hidden = false;
+    clearInterval(timer);
+  });
 
-    // Tap/click anywhere on slideshow -> next
-    slideStage?.addEventListener('click', ()=>{
-      next();
-      const r = slideStage.getBoundingClientRect();
-      heartBurst(r.left + r.width/2, r.top + r.height/2);
-      startAuto();
-    });
+  /* ================= MAIN SITE PREVIEW ================= */
+  const to = document.getElementById('to');
+  const from = document.getElementById('from');
+  const message = document.getElementById('message');
+  const pTo = document.getElementById('pTo');
+  const pFrom = document.getElementById('pFrom');
+  const pMsg = document.getElementById('pMsg');
 
-    // Spotify embed (pre-filled)
-    const spotifyFrame = document.getElementById('spotifyFrame');
-    spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
+  function sync(){
+    pTo.textContent = to.value;
+    pFrom.textContent = from.value;
+    pMsg.textContent = message.value;
+  }
 
-    // Note: browsers may block autoplay. The Spotify player will appear; user may need to press play once.
-
-    toSlideshow.addEventListener('click', ()=>{
-      treeWrap.hidden = true;
-      slideWrap.hidden = false;
-      showSlide(0);
-      startAuto();
-      const rect = toSlideshow.getBoundingClientRect();
-      heartBurst(rect.left + rect.width/2, rect.top + rect.height/2);
-      toast('Okay… now look 😳💗');
-    });
-
-t = message.value || '';
-    }
-    [to, from, message].forEach(el => el.addEvdocument.getElementById('enterSite').addEventListener('click', ()=>{
-      slideWrap.hidden = true;
-      main.hidden = false;
-      stopAuto();
-      const rect = document.getElementById('enterSite').getBoundingClientRect();
-      heartBurst(rect.left + rect.width/2, rect.top + rect.height/2);
-      toast('Welcome 💘');
-    });ard.writeText(txt);
-        toast('Copied! Paste it into your chat ✨');
-      }catch{
-        const ta = document.createElement('textarea');
-        ta.value = txt;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
-        toast('Copied! Paste it into your chat ✨');
-      }
-    });
-
-    // Celebrate burst
-    document.getElementById('celebrate').addEventListener('click', (e)=>{
-      const rect = e.target.getBoundingClientRect();
-      heartBurst(rect.left + rect.width/2, rect.top + rect.height/2);
-      e.target.animate([
-        {transform:'translateY(-1px) scale(1.0)'},
-        {transform:'translateY(-1px) scale(1.03)'},
-        {transform:'translateY(-1px) scale(1.0)'}
-      ], {duration:280, easing:'ease-out'});
-      toast(pick(['Sent with love 💞','Love delivered 💌','Boom! Hearts! 💖']));
-    });
-
-    // Surprise button (multiple surprises)
-    const surpriseLines = [
-      'You’re my favorite notification. 📱💗',
-      'If kisses were stars, I’d give you the sky. ✨',
-      'I choose you—today and all the tomorrows. 💞',
-      'My heart does a little dance when I think of you. 🩷',
-      'You + me = my happiest place. 🥰',
-      'Plot twist: I like you… a LOT. 😳💘',
-      'If love was a playlist, you’d be on repeat. 🎶',
-      'I’d still pick you in every universe. 🌙'
-    ];
-    document.getElementById('surprise').addEventListener('click', ()=>{
-      const line = pick(surpriseLines);
-      toast(line);
-      heartBurst(rand(100, window.innerWidth-100), rand(120, window.innerHeight-140));
-      // sometimes pop an alert too
-      if(Math.random() < 0.35){
-        alert(line + "
-
-Happy Valentine’s! 💖");
-      }
-    });
-
-    // Background click burst sometimes
-    window.addEventListener('click', (e)=>{
-      if(e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-      if(Math.random() < 0.18) heartBurst(e.clientX, e.clientY);
-    });
-    // Init slideshow first frame (in case)
-    slideA.src = photos[0];
-    slideA.classList.add('show');
-
-  </script>
+  [to,from,message].forEach(el=> el.addEventListener('input', sync));
+  sync();
+</script>
 </body>
 </html>
