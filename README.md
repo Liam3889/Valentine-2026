@@ -408,52 +408,38 @@ Will you be my Valentine? 💖</div>
   </footer>
 
   <script>
-  // Everything runs after DOM is ready (prevents "buttons not working")
   window.addEventListener('DOMContentLoaded', () => {
     const rand = (a,b)=> Math.random()*(b-a)+a;
+    const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
 
-    // Tiny toast notifications (used by "More Surprises" etc.)
+    // ---------- Tiny toast notifications ----------
     let toastEl;
     function toast(msg){
-      if(toastEl) toastEl.remove();
-      toastEl = document.createElement('div');
-      toastEl.textContent = msg;
-      Object.assign(toastEl.style, {
-        position:'fixed', left:'50%', bottom:'18px', transform:'translateX(-50%)',
-        padding:'10px 12px', background:'rgba(255,255,255,.82)',
-        border:'1px solid rgba(0,0,0,.10)', borderRadius:'14px',
-        boxShadow:'0 16px 40px rgba(0,0,0,.16)', backdropFilter:'blur(10px)',
-        fontWeight:'900', zIndex:9999, maxWidth:'min(92vw, 520px)', textAlign:'center'
-      });
-      document.body.appendChild(toastEl);
-      toastEl.animate([
-        {opacity:0, transform:'translateX(-50%) translateY(10px)'},
-        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
-        {opacity:1, transform:'translateX(-50%) translateY(0px)'},
-        {opacity:0, transform:'translateX(-50%) translateY(10px)'}
-      ], {duration:2200, easing:'ease-out'}).onfinish = ()=> toastEl?.remove();
-    }
-
-    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-    function softPopup(msg){
-      // Prefer toast; rarely use blocking alert.
-      toast(msg);
-      if(Math.random() < 0.18) alert(msg);
-    }
-
-    const hearts = document.getElementById('hearts');
-    const burst = document.getElementById('burst');
-
-    // Safety: if something is missing, surface it clearly
-    function must(id){
-      const el = document.getElementById(id);
-      if(!el){
-        console.error('Missing element:', id);
+      try{
+        if(toastEl) toastEl.remove();
+        toastEl = document.createElement('div');
+        toastEl.textContent = msg;
+        Object.assign(toastEl.style, {
+          position:'fixed', left:'50%', bottom:'18px', transform:'translateX(-50%)',
+          padding:'10px 12px', background:'rgba(255,255,255,.86)',
+          border:'1px solid rgba(0,0,0,.10)', borderRadius:'14px',
+          boxShadow:'0 16px 40px rgba(0,0,0,.16)', backdropFilter:'blur(10px)',
+          fontWeight:'900', zIndex:9999, maxWidth:'min(92vw, 520px)', textAlign:'center'
+        });
+        document.body.appendChild(toastEl);
+        toastEl.animate([
+          {opacity:0, transform:'translateX(-50%) translateY(10px)'},
+          {opacity:1, transform:'translateX(-50%) translateY(0px)'},
+          {opacity:1, transform:'translateX(-50%) translateY(0px)'},
+          {opacity:0, transform:'translateX(-50%) translateY(10px)'}
+        ], {duration:2200, easing:'ease-out'}).onfinish = ()=> toastEl?.remove();
+      } catch(e){
+        console.error(e);
       }
-      return el;
     }
 
+    // ---------- Burst ----------
+    const burst = document.getElementById('burst');
     function heartBurst(x,y){
       if(!burst) return;
       for(let i=0;i<18;i++){
@@ -469,7 +455,8 @@ Will you be my Valentine? 💖</div>
       }
     }
 
-    // Background floating hearts
+    // ---------- Background floating hearts ----------
+    const hearts = document.getElementById('hearts');
     if(hearts && !hearts.dataset.made){
       hearts.dataset.made = '1';
       for(let i=0;i<26;i++){
@@ -485,38 +472,19 @@ Will you be my Valentine? 💖</div>
       }
     }
 
-    // Page sections
-    const ask = must('ask');
-    const treeWrap = must('treeWrap');
-    const slideWrap = must('slideWrap');
-    const main = must('main');
+    // ---------- Sections ----------
+    const ask = document.getElementById('ask');
+    const treeWrap = document.getElementById('treeWrap');
+    const slideWrap = document.getElementById('slideWrap');
+    const main = document.getElementById('main');
 
-    // Ask buttons
-    const yesBtn = must('yesBtn');
-    const noBtn = must('noBtn');
-    const askBtns = must('askBtns');
+    // ---------- Ask buttons ----------
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const askBtns = document.getElementById('askBtns');
 
-    // Tree elements
-    const trunk = must('trunk');
-    const branches = must('branches');
-    const leafLayer = must('leafLayer');
-    const rainLayer = must('rainLayer');
-    const toSlideshow = must('toSlideshow');
-
-    // Slideshow elements
-    const slideA = must('slideA');
-    const slideB = must('slideB');
-    const slideStage = must('slideStage');
-    const spotifyFrame = must('spotifyFrame');
-    const enterSite = must('enterSite');
-
-    // Main page elements
-    const openSlideshow = must('openSlideshow');
-
-    // --- NO button: move + shrink; YES grows ---
     let noScale = 1;
     let yesScale = 1;
-
     function moveNo(){
       if(!askBtns || !noBtn || !yesBtn) return;
       const area = askBtns.getBoundingClientRect();
@@ -532,7 +500,7 @@ Will you be my Valentine? 💖</div>
       noBtn.style.top = y + 'px';
 
       noScale = Math.max(.35, noScale * .85);
-      yesScale = Math.min(2.1, yesScale * 1.10);
+      yesScale = Math.min(2.2, yesScale * 1.10);
       noBtn.style.transform = `scale(${noScale})`;
       yesBtn.style.transform = `scale(${yesScale})`;
 
@@ -540,57 +508,90 @@ Will you be my Valentine? 💖</div>
       heartBurst(r.left + r.width/2, r.top + r.height/2);
     }
 
-    // Works on desktop + mobile
     ['mouseenter','pointerdown','click'].forEach(evt => {
       noBtn?.addEventListener(evt, (e)=>{ e.preventDefault(); moveNo(); });
     });
 
-    // --- TREE: grow + heart leaves + heart rain ---
+    // ---------- Tree (heart-shaped) ----------
+    const trunk = document.getElementById('trunk');
+    const branches = document.getElementById('branches');
+    const leafLayer = document.getElementById('leafLayer');
+    const rainLayer = document.getElementById('rainLayer');
+    const toSlideshow = document.getElementById('toSlideshow');
+
+    function heartPoints(n=42){
+      // Parametric heart curve -> returns points normalized to [0..100] space
+      // x = 16 sin^3 t
+      // y = 13 cos t - 5 cos 2t - 2 cos 3t - cos 4t
+      const pts = [];
+      let minX=1e9, maxX=-1e9, minY=1e9, maxY=-1e9;
+      for(let i=0;i<n;i++){
+        const t = (Math.PI*2) * (i/(n-1));
+        const x = 16*Math.pow(Math.sin(t),3);
+        const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+        minX = Math.min(minX,x); maxX = Math.max(maxX,x);
+        minY = Math.min(minY,y); maxY = Math.max(maxY,y);
+        pts.push([x,y]);
+      }
+      return pts.map(([x,y])=>{
+        const nx = (x - minX) / (maxX - minX);
+        const ny = (y - minY) / (maxY - minY);
+        // map to canopy area (centered)
+        const X = 50 + (nx - 0.5) * 50;   // width ~50%
+        const Y = 18 + ny * 50;          // top ~18% to ~68%
+        return [X,Y];
+      });
+    }
+
     function growTree(){
-      if(!leafLayer || !rainLayer) return;
-      leafLayer.innerHTML = '';
-      rainLayer.innerHTML = '';
+      if(leafLayer) leafLayer.innerHTML = '';
+      if(rainLayer) rainLayer.innerHTML = '';
 
-      trunk.style.opacity = '1';
-      branches.style.opacity = '1';
+      // show trunk/branches
+      if(trunk){
+        trunk.style.opacity = '1';
+        trunk.classList.remove('drawTrunk');
+        void trunk.offsetWidth;
+        trunk.classList.add('drawTrunk');
+      }
+      if(branches){
+        branches.style.opacity = '1';
+        branches.classList.remove('drawBranches');
+        void branches.offsetWidth;
+        branches.classList.add('drawBranches');
+      }
 
-      // restart animations
-      trunk.classList.remove('drawTrunk');
-      branches.classList.remove('drawBranches');
-      void trunk.offsetWidth;
-      trunk.classList.add('drawTrunk');
-      branches.classList.add('drawBranches');
+      // Build a HEART-SHAPED canopy
+      const outline = heartPoints(46);
+      const fillCount = 60;
 
-      // heart leaves (with explicit background)
-      // Place hearts in a canopy shape (less random, more "tree")
-      const canopy = [
-        [50,18],[42,20],[58,20],[36,24],[64,24],
-        [30,30],[70,30],[26,38],[74,38],
-        [30,46],[70,46],[36,54],[64,54],
-        [42,58],[58,58],[50,62]
-      ];
-      canopy.forEach((pt, i)=>{
+      // Outline hearts
+      outline.forEach((pt, i)=>{
         const leaf = document.createElement('div');
         leaf.className = 'leaf';
         leaf.style.left = pt[0] + '%';
         leaf.style.top = pt[1] + '%';
-        leaf.style.background = (i % 5 === 0) ? 'var(--accent2)' : 'var(--accent)';
-        leaf.style.animationDelay = (i*70) + 'ms';
-        leafLayer.appendChild(leaf);
+        leaf.style.background = (i % 6 === 0) ? 'var(--accent2)' : 'var(--accent)';
+        leaf.style.animationDelay = (i*35) + 'ms';
+        leafLayer?.appendChild(leaf);
       });
-      // Add a few extras around canopy edges
-      for(let i=0;i<10;i++){
+
+      // Filled hearts inside the heart canopy (randomly around center)
+      for(let i=0;i<fillCount;i++){
         const leaf = document.createElement('div');
         leaf.className = 'leaf';
-        leaf.style.left = rand(28,72) + '%';
-        leaf.style.top = rand(16,66) + '%';
-        leaf.style.background = Math.random() < 0.28 ? 'var(--accent2)' : 'var(--accent)';
-        leaf.style.animationDelay = (canopy.length*70 + i*55) + 'ms';
-        leafLayer.appendChild(leaf);
+        // bias toward center of heart
+        const x = 50 + rand(-18, 18) + rand(-10,10);
+        const y = 42 + rand(-16, 16);
+        leaf.style.left = x + '%';
+        leaf.style.top = y + '%';
+        leaf.style.background = Math.random() < 0.25 ? 'var(--accent2)' : 'var(--accent)';
+        leaf.style.animationDelay = (outline.length*35 + i*20) + 'ms';
+        leafLayer?.appendChild(leaf);
       }
 
-      // heart rain (with background + drift)
-      for(let i=0;i<52;i++){
+      // Heart rain
+      for(let i=0;i<44;i++){
         setTimeout(()=>{
           const h = document.createElement('div');
           h.className = 'rainHeart';
@@ -598,7 +599,7 @@ Will you be my Valentine? 💖</div>
           h.style.setProperty('--dur', rand(1.6,3.0) + 's');
           h.style.setProperty('--drift', rand(-40, 40) + 'px');
           h.style.background = Math.random() < 0.3 ? 'var(--accent2)' : 'var(--accent)';
-          rainLayer.appendChild(h);
+          rainLayer?.appendChild(h);
           h.addEventListener('animationend', ()=> h.remove());
         }, i*55);
       }
@@ -607,21 +608,27 @@ Will you be my Valentine? 💖</div>
       if(r) heartBurst(r.left + r.width/2, r.top + r.height/3);
     }
 
-    // YES click -> show tree
     yesBtn?.addEventListener('click', ()=>{
-      ask.hidden = true;
-      treeWrap.hidden = false;
+      ask && (ask.hidden = true);
+      treeWrap && (treeWrap.hidden = false);
       growTree();
     });
 
-    // Continue after tree -> main page (slideshow is last)
+    // Tree continue -> main page (slideshow last)
     toSlideshow?.addEventListener('click', ()=>{
-      treeWrap.hidden = true;
-      main.hidden = false;
+      treeWrap && (treeWrap.hidden = true);
+      main && (main.hidden = false);
       window.scrollTo({top:0, behavior:'smooth'});
     });
 
-    // --- SLIDESHOW (last page) ---
+    // ---------- Slideshow (last page) ----------
+    const slideA = document.getElementById('slideA');
+    const slideB = document.getElementById('slideB');
+    const slideStage = document.getElementById('slideStage');
+    const spotifyFrame = document.getElementById('spotifyFrame');
+    const enterSite = document.getElementById('enterSite');
+    const openSlideshowBtn = document.getElementById('openSlideshow');
+
     const photos = [
       'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
       'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
@@ -660,29 +667,24 @@ Will you be my Valentine? 💖</div>
       heartBurst(r.left + r.width/2, r.top + r.height/2);
     });
 
-    // Spotify embed (cannot reliably autoplay)
     if(spotifyFrame){
       spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
-      // Hint for the user (Spotify usually needs one tap)
-      setTimeout(()=> toast('Tap ▶ on the Spotify player 💗'), 600);
     }
 
-    openSlideshow?.addEventListener('click', ()=>{
-      main.hidden = true;
-      slideWrap.hidden = false;
+    openSlideshowBtn?.addEventListener('click', ()=>{
+      main && (main.hidden = true);
+      slideWrap && (slideWrap.hidden = false);
       startSlideshow();
-      // Gentle hint: Spotify needs a user tap to play in most browsers.
-      const r = slideStage?.getBoundingClientRect();
-      if(r) heartBurst(r.left + r.width/2, r.top + 60);
+      setTimeout(()=> toast('Tap ▶ on the Spotify player 💗'), 450);
     });
 
     enterSite?.addEventListener('click', ()=>{
-      slideWrap.hidden = true;
-      main.hidden = false;
+      slideWrap && (slideWrap.hidden = true);
+      main && (main.hidden = false);
       stopSlideshow();
     });
 
-    // --- MAIN SITE PREVIEW ---
+    // ---------- Main page preview + buttons ----------
     const to = document.getElementById('to');
     const from = document.getElementById('from');
     const message = document.getElementById('message');
@@ -691,36 +693,14 @@ Will you be my Valentine? 💖</div>
     const pMsg = document.getElementById('pMsg');
 
     function sync(){
-      if(!to || !from || !message) return;
-      if(pTo) pTo.textContent = to.value || 'My Favorite Human';
-      if(pFrom) pFrom.textContent = from.value || 'Someone Who Adore You';
-      if(pMsg) pMsg.textContent = message.value || '';
+      if(pTo && to) pTo.textContent = to.value || 'My Favorite Human';
+      if(pFrom && from) pFrom.textContent = from.value || 'Someone Who Adore You';
+      if(pMsg && message) pMsg.textContent = message.value || '';
     }
-
     [to, from, message].forEach(el => el?.addEventListener('input', sync));
     sync();
 
-    // --- Buttons on main page ---
-    const celebrateBtn = document.getElementById('celebrate');
-    const copyBtn = document.getElementById('copy');
-    const surpriseBtn = document.getElementById('surprise');
-
-    celebrateBtn?.addEventListener('click', (e)=>{
-      const r = e.target.getBoundingClientRect();
-      heartBurst(r.left + r.width/2, r.top + r.height/2);
-      toast(pick(['Sent with love 💞','Hearts delivered 💌','Love mode: ON 💖']));
-    });
-
-    copyBtn?.addEventListener('click', async ()=>{
-      const txt = `💘 Valentine’s Note 💘\n\nTo: ${pTo?.textContent || ''}\nFrom: ${pFrom?.textContent || ''}\n\n${pMsg?.textContent || ''}`;
-      try{
-        await navigator.clipboard.writeText(txt);
-        toast('Copied! Paste it into your chat ✨');
-      }catch{
-        softPopup('Copy failed on this browser — try selecting the text manually.');
-      }
-    });
-
+    // Reliable click handling (even if buttons move / reflow)
     const surpriseLines = [
       'You’re my favorite notification. 📱💗',
       'If love was a playlist, you’d be on repeat. 🎶',
@@ -730,11 +710,35 @@ Will you be my Valentine? 💖</div>
       'You + me = my happiest place. 🥰'
     ];
 
-    surpriseBtn?.addEventListener('click', ()=>{
-      const msg = pick(surpriseLines);
-      softPopup(msg);
-      heartBurst(rand(120, window.innerWidth-120), rand(160, window.innerHeight-180));
+    document.addEventListener('click', async (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+
+      if(btn.id === 'surprise'){
+        const msg = pick(surpriseLines);
+        toast(msg);
+        heartBurst(rand(120, window.innerWidth-120), rand(160, window.innerHeight-180));
+      }
+
+      if(btn.id === 'copy'){
+        const txt = `💘 Valentine’s Note 💘\n\nTo: ${pTo?.textContent || ''}\nFrom: ${pFrom?.textContent || ''}\n\n${pMsg?.textContent || ''}`;
+        try{
+          await navigator.clipboard.writeText(txt);
+          toast('Copied! Paste it into your chat ✨');
+        }catch{
+          toast('Copy blocked by browser — try selecting text manually.');
+        }
+      }
+
+      if(btn.id === 'celebrate'){
+        const r = btn.getBoundingClientRect();
+        heartBurst(r.left + r.width/2, r.top + r.height/2);
+        toast(pick(['Sent with love 💞','Hearts delivered 💌','Love mode: ON 💖']));
+      }
     });
+
+    // small sanity ping
+    toast('Ready 💘');
   });
 </script>
 </body>
