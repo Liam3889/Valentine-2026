@@ -712,10 +712,10 @@ Will you be my Valentine? 💖</div>
     const surpriseLines = [
       'You’re my favorite notification. 📱💗',
       'If love was a playlist, you’d be on repeat. 🎶',
-      'I’d still pick you in every universe. 🌙',
-      'Plot twist: I like you… a LOT. 😳💘',
-      'My heart does a little dance when I think of you. 🩷',
-      'You + me = my happiest place. 🥰'
+      'I’d still pick you in every universe even if you are bald :v . 🌙',
+      'Plot twist: I love you a lot. 😳💘',
+      'If the sun have the moon, to fill its half, you are moon cuz u are my other half . 🩷',
+      'You + me = my happiest place, my safe house, my home. 🥰'
     ];
 
     document.addEventListener('click', async (e)=>{
