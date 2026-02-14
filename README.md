@@ -292,7 +292,7 @@
         <div class="rainLayer" id="rainLayer" aria-hidden="true"></div>
       </div>
       <div class="ctaRow" style="justify-content:center; margin-top:14px;">
-        <button class="primary" id="toSlideshow">Next 💞</button>
+        <button class="primary" id="toSlideshow">Continue 💘</button>
       </div>
     </div>
   </section>
@@ -319,7 +319,7 @@
       </div>
 
       <div class="ctaRow" style="justify-content:center; margin-top:14px;">
-        <button class="primary" id="enterSite">Continue ✨</button>
+        <button class="primary" id="enterSite">Back to letter 💌</button>
       </div>
 
       <p class="tiny" style="margin-top:10px;">
@@ -365,6 +365,7 @@ Will you be my Valentine? 💖</textarea>
         <button class="primary" id="celebrate">Send with Love ✨</button>
         <button class="secondary" id="copy">Copy Link Text 🔗</button>
         <button class="secondary" id="surprise">More Surprises 🎁</button>
+        <button class="secondary" id="openSlideshow">Open our slideshow 💗</button>
       </div>
 
       <p class="tiny" style="margin-top:14px;">Want more pages, a different theme, or a “memory timeline” layout? Tell me what vibe you want.</p>
@@ -495,18 +496,44 @@ Will you be my Valentine? 💖</div>
   const toSlideshow = document.getElementById('toSlideshow');
 
   function growTree(){
+    // reset layers
+    leafLayer.innerHTML = '';
+    rainLayer.innerHTML = '';
+
     trunk.style.opacity = '1';
     branches.style.opacity = '1';
+    trunk.classList.remove('drawTrunk');
+    branches.classList.remove('drawBranches');
+    // restart animations
+    void trunk.offsetWidth;
     trunk.classList.add('drawTrunk');
     branches.classList.add('drawBranches');
 
-    for(let i=0;i<20;i++){
+    // heart "leaves" (these were invisible before because they had no background)
+    for(let i=0;i<26;i++){
       const leaf = document.createElement('div');
       leaf.className = 'leaf';
-      leaf.style.left = rand(30,70) + '%';
-      leaf.style.top = rand(20,70) + '%';
+      leaf.style.left = rand(28,72) + '%';
+      leaf.style.top = rand(18,68) + '%';
+      leaf.style.background = Math.random() < 0.28 ? 'var(--accent2)' : 'var(--accent)';
+      leaf.style.animationDelay = (i*55) + 'ms';
       leafLayer.appendChild(leaf);
     }
+
+    // heart rain
+    for(let i=0;i<46;i++){
+      setTimeout(()=>{
+        const h = document.createElement('div');
+        h.className = 'rainHeart';
+        h.style.left = rand(5,95) + '%';
+        h.style.setProperty('--dur', rand(1.6,3.0) + 's');
+        h.style.setProperty('--drift', rand(-40, 40) + 'px');
+        h.style.background = Math.random() < 0.3 ? 'var(--accent2)' : 'var(--accent)';
+        rainLayer.appendChild(h);
+        h.addEventListener('animationend', ()=> h.remove());
+      }, i*65);
+    }
+  }
 
     for(let i=0;i<40;i++){
       setTimeout(()=>{
@@ -521,9 +548,10 @@ Will you be my Valentine? 💖</div>
   }
 
   toSlideshow.addEventListener('click', ()=>{
+    // per your request: slideshow is LAST page now.
     treeWrap.hidden = true;
-    slideWrap.hidden = false;
-    startSlideshow();
+    main.hidden = false;
+    window.scrollTo({top:0, behavior:'smooth'});
   });
 
   /* ================= SLIDESHOW ================= */
@@ -562,12 +590,25 @@ Will you be my Valentine? 💖</div>
     showSlide(index+1);
   });
 
+  // open slideshow from the MAIN page (slideshow is last)
+  const openSlideshow = document.getElementById('openSlideshow');
+  openSlideshow.addEventListener('click', ()=>{
+    slideWrap.hidden = false;
+    // keep main visible behind? better: hide it
+    main.hidden = true;
+    startSlideshow();
+    // try to start Spotify (usually blocked). User can tap play in the Spotify widget.
+    const r = slideStage.getBoundingClientRect();
+    heartBurst(r.left + r.width/2, r.top + 60);
+  });
+
   /* Spotify embed */
   const spotifyFrame = document.getElementById('spotifyFrame');
   spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
 
   /* Continue to main */
   document.getElementById('enterSite').addEventListener('click', ()=>{
+    // back to the main letter page
     slideWrap.hidden = true;
     main.hidden = false;
     clearInterval(timer);
