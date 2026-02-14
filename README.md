@@ -630,9 +630,17 @@ Will you be my Valentine? 💖</div>
     const openSlideshowBtn = document.getElementById('openSlideshow');
 
     const photos = [
-      'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf6?auto=format&fit=crop&w=1400&q=80'
+  'DSC00364.JPG',
+  'DSC00372_1.JPG',
+  'DSC00374_1.JPG',
+  'DSC00384_1.JPG',
+  'DSC00401.JPG',
+  'DSC00409.JPG',
+  'DSC00419.JPG',
+  'DSC00421.JPG',
+  'DSC00428.JPG',
+  'DSC00435.JPG',
+  'DSC00436.JPG'
     ];
 
     let index = 0;
