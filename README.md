@@ -538,7 +538,7 @@ Will you be my Valentine? 💖</div>
         const ny = (y - minY) / (maxY - minY);
         // map to canopy area (centered)
         const X = 50 + (nx - 0.5) * 50;   // width ~50%
-        const Y = 18 + ny * 50;          // top ~18% to ~68%
+        const Y = 18 + (1 - ny) * 50; // flip so heart is upright          // top ~18% to ~68%
         return [X,Y];
       });
     }
@@ -721,7 +721,12 @@ Will you be my Valentine? 💖</div>
       }
 
       if(btn.id === 'copy'){
-        const txt = `💘 Valentine’s Note 💘\n\nTo: ${pTo?.textContent || ''}\nFrom: ${pFrom?.textContent || ''}\n\n${pMsg?.textContent || ''}`;
+        const txt = `💘 Valentine’s Note 💘
+
+To: ${pTo?.textContent || ''}
+From: ${pFrom?.textContent || ''}
+
+${pMsg?.textContent || ''}`;
         try{
           await navigator.clipboard.writeText(txt);
           toast('Copied! Paste it into your chat ✨');
@@ -735,6 +740,12 @@ Will you be my Valentine? 💖</div>
         heartBurst(r.left + r.width/2, r.top + r.height/2);
         toast(pick(['Sent with love 💞','Hearts delivered 💌','Love mode: ON 💖']));
       }
+    });
+
+    // Tap/click anywhere (not on buttons) -> tiny effect (like before)
+    document.addEventListener('click', (e)=>{
+      if(e.target.closest('button')) return;
+      if(Math.random() < 0.28) heartBurst(e.clientX, e.clientY);
     });
 
     // small sanity ping
