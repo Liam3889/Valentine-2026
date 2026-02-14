@@ -408,228 +408,249 @@ Will you be my Valentine? 💖</div>
   </footer>
 
   <script>
-  const rand = (a,b)=> Math.random()*(b-a)+a;
-  const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+  // Everything runs after DOM is ready (prevents "buttons not working")
+  window.addEventListener('DOMContentLoaded', () => {
+    const rand = (a,b)=> Math.random()*(b-a)+a;
 
-  /* ================= BACKGROUND HEARTS ================= */
-  const hearts = document.getElementById('hearts');
-  for(let i=0;i<26;i++){
-    const h = document.createElement('div');
-    h.className = 'heart';
-    h.style.left = rand(0,100) + 'vw';
-    h.style.animationDuration = rand(6,14) + 's';
-    h.style.animationDelay = (-rand(0,8)) + 's';
-    h.style.setProperty('--s', rand(.7, 1.8));
-    h.style.opacity = rand(.25, .75);
-    h.style.background = Math.random() < .25 ? 'var(--accent2)' : 'var(--accent)';
-    hearts.appendChild(h);
-  }
+    const hearts = document.getElementById('hearts');
+    const burst = document.getElementById('burst');
 
-  /* ================= BURST ================= */
-  const burst = document.getElementById('burst');
-  function heartBurst(x,y){
-    for(let i=0;i<20;i++){
-      const s = document.createElement('div');
-      s.className = 'spark';
-      s.style.left = x + 'px';
-      s.style.top = y + 'px';
-      s.style.setProperty('--dx', rand(-160, 160) + 'px');
-      s.style.setProperty('--dy', rand(-180, 120) + 'px');
-      burst.appendChild(s);
-      s.addEventListener('animationend', ()=> s.remove());
-    }
-  }
-
-  /* ================= PAGE FLOW ================= */
-  const ask = document.getElementById('ask');
-  const yesBtn = document.getElementById('yesBtn');
-  const noBtn = document.getElementById('noBtn');
-  const askBtns = document.getElementById('askBtns');
-
-  const treeWrap = document.getElementById('treeWrap');
-  const slideWrap = document.getElementById('slideWrap');
-  const main = document.getElementById('main');
-
-  /* ================= NO BUTTON LOGIC ================= */
-  let noScale = 1;
-  let yesScale = 1;
-
-  function moveNo(){
-    const area = askBtns.getBoundingClientRect();
-    const pad = 10;
-    const x = rand(pad, area.width - 80);
-    const y = rand(pad, area.height - 40);
-
-    askBtns.style.position = 'relative';
-    noBtn.style.position = 'absolute';
-    noBtn.style.left = x + 'px';
-    noBtn.style.top = y + 'px';
-
-    noScale = Math.max(.35, noScale * .85);
-    yesScale = Math.min(2, yesScale * 1.1);
-
-    noBtn.style.transform = `scale(${noScale})`;
-    yesBtn.style.transform = `scale(${yesScale})`;
-
-    const r = noBtn.getBoundingClientRect();
-    heartBurst(r.left + r.width/2, r.top + r.height/2);
-  }
-
-  noBtn.addEventListener('mouseenter', moveNo);
-  noBtn.addEventListener('click', (e)=>{
-    e.preventDefault();
-    moveNo();
-  });
-
-  /* ================= YES BUTTON ================= */
-  yesBtn.addEventListener('click', ()=>{
-    ask.hidden = true;
-    treeWrap.hidden = false;
-    growTree();
-  });
-
-  /* ================= TREE ================= */
-  const trunk = document.getElementById('trunk');
-  const branches = document.getElementById('branches');
-  const leafLayer = document.getElementById('leafLayer');
-  const rainLayer = document.getElementById('rainLayer');
-  const toSlideshow = document.getElementById('toSlideshow');
-
-  function growTree(){
-    // reset layers
-    leafLayer.innerHTML = '';
-    rainLayer.innerHTML = '';
-
-    trunk.style.opacity = '1';
-    branches.style.opacity = '1';
-    trunk.classList.remove('drawTrunk');
-    branches.classList.remove('drawBranches');
-    // restart animations
-    void trunk.offsetWidth;
-    trunk.classList.add('drawTrunk');
-    branches.classList.add('drawBranches');
-
-    // heart "leaves" (these were invisible before because they had no background)
-    for(let i=0;i<26;i++){
-      const leaf = document.createElement('div');
-      leaf.className = 'leaf';
-      leaf.style.left = rand(28,72) + '%';
-      leaf.style.top = rand(18,68) + '%';
-      leaf.style.background = Math.random() < 0.28 ? 'var(--accent2)' : 'var(--accent)';
-      leaf.style.animationDelay = (i*55) + 'ms';
-      leafLayer.appendChild(leaf);
+    // Safety: if something is missing, surface it clearly
+    function must(id){
+      const el = document.getElementById(id);
+      if(!el){
+        console.error('Missing element:', id);
+      }
+      return el;
     }
 
-    // heart rain
-    for(let i=0;i<46;i++){
-      setTimeout(()=>{
+    function heartBurst(x,y){
+      if(!burst) return;
+      for(let i=0;i<18;i++){
+        const s = document.createElement('div');
+        s.className = 'spark';
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        s.style.setProperty('--dx', rand(-160, 160) + 'px');
+        s.style.setProperty('--dy', rand(-180, 120) + 'px');
+        s.style.background = Math.random() < .35 ? 'var(--accent2)' : 'var(--accent)';
+        burst.appendChild(s);
+        s.addEventListener('animationend', ()=> s.remove());
+      }
+    }
+
+    // Background floating hearts
+    if(hearts && !hearts.dataset.made){
+      hearts.dataset.made = '1';
+      for(let i=0;i<26;i++){
         const h = document.createElement('div');
-        h.className = 'rainHeart';
-        h.style.left = rand(5,95) + '%';
-        h.style.setProperty('--dur', rand(1.6,3.0) + 's');
-        h.style.setProperty('--drift', rand(-40, 40) + 'px');
-        h.style.background = Math.random() < 0.3 ? 'var(--accent2)' : 'var(--accent)';
-        rainLayer.appendChild(h);
-        h.addEventListener('animationend', ()=> h.remove());
-      }, i*65);
+        h.className = 'heart';
+        h.style.left = rand(0,100) + 'vw';
+        h.style.animationDuration = rand(6,14) + 's';
+        h.style.animationDelay = (-rand(0,8)) + 's';
+        h.style.setProperty('--s', rand(.7, 1.8));
+        h.style.opacity = rand(.25, .75);
+        h.style.background = Math.random() < .25 ? 'var(--accent2)' : 'var(--accent)';
+        hearts.appendChild(h);
+      }
     }
-  }
 
-    for(let i=0;i<40;i++){
-      setTimeout(()=>{
-        const h = document.createElement('div');
-        h.className = 'rainHeart';
-        h.style.left = rand(5,95) + '%';
-        h.style.setProperty('--dur', rand(1.5,3) + 's');
-        rainLayer.appendChild(h);
-        h.addEventListener('animationend', ()=> h.remove());
-      }, i*60);
+    // Page sections
+    const ask = must('ask');
+    const treeWrap = must('treeWrap');
+    const slideWrap = must('slideWrap');
+    const main = must('main');
+
+    // Ask buttons
+    const yesBtn = must('yesBtn');
+    const noBtn = must('noBtn');
+    const askBtns = must('askBtns');
+
+    // Tree elements
+    const trunk = must('trunk');
+    const branches = must('branches');
+    const leafLayer = must('leafLayer');
+    const rainLayer = must('rainLayer');
+    const toSlideshow = must('toSlideshow');
+
+    // Slideshow elements
+    const slideA = must('slideA');
+    const slideB = must('slideB');
+    const slideStage = must('slideStage');
+    const spotifyFrame = must('spotifyFrame');
+    const enterSite = must('enterSite');
+
+    // Main page elements
+    const openSlideshow = must('openSlideshow');
+
+    // --- NO button: move + shrink; YES grows ---
+    let noScale = 1;
+    let yesScale = 1;
+
+    function moveNo(){
+      if(!askBtns || !noBtn || !yesBtn) return;
+      const area = askBtns.getBoundingClientRect();
+      const pad = 10;
+      const maxX = Math.max(pad, area.width - 90);
+      const maxY = Math.max(pad, area.height - 50);
+      const x = rand(pad, maxX);
+      const y = rand(pad, maxY);
+
+      askBtns.style.position = 'relative';
+      noBtn.style.position = 'absolute';
+      noBtn.style.left = x + 'px';
+      noBtn.style.top = y + 'px';
+
+      noScale = Math.max(.35, noScale * .85);
+      yesScale = Math.min(2.1, yesScale * 1.10);
+      noBtn.style.transform = `scale(${noScale})`;
+      yesBtn.style.transform = `scale(${yesScale})`;
+
+      const r = noBtn.getBoundingClientRect();
+      heartBurst(r.left + r.width/2, r.top + r.height/2);
     }
-  }
 
-  toSlideshow.addEventListener('click', ()=>{
-    // per your request: slideshow is LAST page now.
-    treeWrap.hidden = true;
-    main.hidden = false;
-    window.scrollTo({top:0, behavior:'smooth'});
+    // Works on desktop + mobile
+    ['mouseenter','pointerdown','click'].forEach(evt => {
+      noBtn?.addEventListener(evt, (e)=>{ e.preventDefault(); moveNo(); });
+    });
+
+    // --- TREE: grow + heart leaves + heart rain ---
+    function growTree(){
+      if(!leafLayer || !rainLayer) return;
+      leafLayer.innerHTML = '';
+      rainLayer.innerHTML = '';
+
+      trunk.style.opacity = '1';
+      branches.style.opacity = '1';
+
+      // restart animations
+      trunk.classList.remove('drawTrunk');
+      branches.classList.remove('drawBranches');
+      void trunk.offsetWidth;
+      trunk.classList.add('drawTrunk');
+      branches.classList.add('drawBranches');
+
+      // heart leaves (with explicit background)
+      for(let i=0;i<28;i++){
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf';
+        leaf.style.left = rand(26,74) + '%';
+        leaf.style.top = rand(16,70) + '%';
+        leaf.style.background = Math.random() < 0.28 ? 'var(--accent2)' : 'var(--accent)';
+        leaf.style.animationDelay = (i*55) + 'ms';
+        leafLayer.appendChild(leaf);
+      }
+
+      // heart rain (with background + drift)
+      for(let i=0;i<52;i++){
+        setTimeout(()=>{
+          const h = document.createElement('div');
+          h.className = 'rainHeart';
+          h.style.left = rand(5,95) + '%';
+          h.style.setProperty('--dur', rand(1.6,3.0) + 's');
+          h.style.setProperty('--drift', rand(-40, 40) + 'px');
+          h.style.background = Math.random() < 0.3 ? 'var(--accent2)' : 'var(--accent)';
+          rainLayer.appendChild(h);
+          h.addEventListener('animationend', ()=> h.remove());
+        }, i*55);
+      }
+
+      const r = document.getElementById('treeStage')?.getBoundingClientRect();
+      if(r) heartBurst(r.left + r.width/2, r.top + r.height/3);
+    }
+
+    // YES click -> show tree
+    yesBtn?.addEventListener('click', ()=>{
+      ask.hidden = true;
+      treeWrap.hidden = false;
+      growTree();
+    });
+
+    // Continue after tree -> main page (slideshow is last)
+    toSlideshow?.addEventListener('click', ()=>{
+      treeWrap.hidden = true;
+      main.hidden = false;
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    // --- SLIDESHOW (last page) ---
+    const photos = [
+      'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
+      'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf6?auto=format&fit=crop&w=1400&q=80'
+    ];
+
+    let index = 0;
+    let timer = null;
+    let front = 'A';
+
+    function showSlide(i){
+      if(!slideA || !slideB || !photos.length) return;
+      index = (i + photos.length) % photos.length;
+      const incoming = (front === 'A') ? slideB : slideA;
+      const outgoing = (front === 'A') ? slideA : slideB;
+      incoming.src = photos[index];
+      incoming.classList.add('show');
+      outgoing.classList.remove('show');
+      front = (front === 'A') ? 'B' : 'A';
+    }
+
+    function startSlideshow(){
+      showSlide(0);
+      if(timer) clearInterval(timer);
+      timer = setInterval(()=> showSlide(index+1), 3000);
+    }
+
+    function stopSlideshow(){
+      if(timer) clearInterval(timer);
+      timer = null;
+    }
+
+    slideStage?.addEventListener('click', ()=>{
+      showSlide(index+1);
+      const r = slideStage.getBoundingClientRect();
+      heartBurst(r.left + r.width/2, r.top + r.height/2);
+    });
+
+    // Spotify embed (cannot reliably autoplay)
+    if(spotifyFrame){
+      spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
+    }
+
+    openSlideshow?.addEventListener('click', ()=>{
+      main.hidden = true;
+      slideWrap.hidden = false;
+      startSlideshow();
+      // Gentle hint: Spotify needs a user tap to play in most browsers.
+      const r = slideStage?.getBoundingClientRect();
+      if(r) heartBurst(r.left + r.width/2, r.top + 60);
+    });
+
+    enterSite?.addEventListener('click', ()=>{
+      slideWrap.hidden = true;
+      main.hidden = false;
+      stopSlideshow();
+    });
+
+    // --- MAIN SITE PREVIEW ---
+    const to = document.getElementById('to');
+    const from = document.getElementById('from');
+    const message = document.getElementById('message');
+    const pTo = document.getElementById('pTo');
+    const pFrom = document.getElementById('pFrom');
+    const pMsg = document.getElementById('pMsg');
+
+    function sync(){
+      if(!to || !from || !message) return;
+      if(pTo) pTo.textContent = to.value || 'My Favorite Human';
+      if(pFrom) pFrom.textContent = from.value || 'Someone Who Adore You';
+      if(pMsg) pMsg.textContent = message.value || '';
+    }
+
+    [to, from, message].forEach(el => el?.addEventListener('input', sync));
+    sync();
   });
-
-  /* ================= SLIDESHOW ================= */
-  const slideA = document.getElementById('slideA');
-  const slideB = document.getElementById('slideB');
-  const slideStage = document.getElementById('slideStage');
-
-  const photos = [
-    'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1520975693411-b2451a62d5f1?auto=format&fit=crop&w=1400&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf6?auto=format&fit=crop&w=1400&q=80'
-  ];
-
-  let index = 0;
-  let timer;
-  let front = 'A';
-
-  function showSlide(i){
-    index = (i + photos.length) % photos.length;
-    const incoming = front === 'A' ? slideB : slideA;
-    const outgoing = front === 'A' ? slideA : slideB;
-
-    incoming.src = photos[index];
-    incoming.classList.add('show');
-    outgoing.classList.remove('show');
-    front = front === 'A' ? 'B' : 'A';
-  }
-
-  function startSlideshow(){
-    showSlide(0);
-    clearInterval(timer);
-    timer = setInterval(()=> showSlide(index+1), 3000);
-  }
-
-  slideStage.addEventListener('click', ()=>{
-    showSlide(index+1);
-  });
-
-  // open slideshow from the MAIN page (slideshow is last)
-  const openSlideshow = document.getElementById('openSlideshow');
-  openSlideshow.addEventListener('click', ()=>{
-    slideWrap.hidden = false;
-    // keep main visible behind? better: hide it
-    main.hidden = true;
-    startSlideshow();
-    // try to start Spotify (usually blocked). User can tap play in the Spotify widget.
-    const r = slideStage.getBoundingClientRect();
-    heartBurst(r.left + r.width/2, r.top + 60);
-  });
-
-  /* Spotify embed */
-  const spotifyFrame = document.getElementById('spotifyFrame');
-  spotifyFrame.src = 'https://open.spotify.com/embed/track/3qhlB30KknSejmIvZZLjOD';
-
-  /* Continue to main */
-  document.getElementById('enterSite').addEventListener('click', ()=>{
-    // back to the main letter page
-    slideWrap.hidden = true;
-    main.hidden = false;
-    clearInterval(timer);
-  });
-
-  /* ================= MAIN SITE PREVIEW ================= */
-  const to = document.getElementById('to');
-  const from = document.getElementById('from');
-  const message = document.getElementById('message');
-  const pTo = document.getElementById('pTo');
-  const pFrom = document.getElementById('pFrom');
-  const pMsg = document.getElementById('pMsg');
-
-  function sync(){
-    pTo.textContent = to.value;
-    pFrom.textContent = from.value;
-    pMsg.textContent = message.value;
-  }
-
-  [to,from,message].forEach(el=> el.addEventListener('input', sync));
-  sync();
 </script>
 </body>
 </html>
